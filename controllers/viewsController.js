@@ -22,10 +22,6 @@ exports.getTour = catchAsync(async (req, res, next) => {
 
   res
     .status(200)
-    .set(
-      'Content-Security-Policy',
-      'connect-src https://*.tiles.mapbox.com https://api.mapbox.com https://events.mapbox.com',
-    )
     .render('tour', {
       title: `${tour.name} Tour`,
       tour,
@@ -36,10 +32,10 @@ exports.getTour = catchAsync(async (req, res, next) => {
 exports.loginUser = (req, res) => {
   res
     .status(200)
-    .set(
+    /*.set(
       'Content-Security-Policy',
-      'connect-src https://cdnjs.cloudflare.com http://127.0.0.1:8000 ws://127.0.0.1:51331/',
-    )
+      'connect-src https://cdnjs.cloudflare.com http://127.0.0.1:8000',
+    )*/
     .render('login', {
       title: 'Login',
     });
