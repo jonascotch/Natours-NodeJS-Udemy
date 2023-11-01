@@ -10346,11 +10346,38 @@
     }
   };
 
+  // public/js/updateSettings.js
+  var updateSettings = async (data, type) => {
+    try {
+      const res = await axios_default({
+        method: "PATCH",
+        url: type === "data" ? "http://127.0.0.1:8000/api/v1/users/updateMe" : "http://127.0.0.1:8000/api/v1/users/updatePassword",
+        data
+      });
+      if (res.data.status === "success") {
+        showAlert(
+          res.data.status,
+          type === "data" ? "Data successfully updated!" : "Password successfully updated!"
+        );
+      }
+    } catch (err) {
+      showAlert("error", err.response.data.message);
+    }
+  };
+
   // public/js/index.js
   document.addEventListener("DOMContentLoaded", (event) => {
     const mapBox = document.getElementById("map");
-    const loginForm = document.querySelector("form");
-    const logOutBtn = document.querySelector(".nav__el--logout");
+    const loginForm = document.querySelector(".form--login");
+    const logOutBtn = document.querySelector(
+      ".nav__el--logout"
+    );
+    const userUpdateForm = document.querySelector(
+      ".form-user-data"
+    );
+    const passwordUpdateForm = document.querySelector(
+      ".form-user-settings"
+    );
     if (mapBox) {
       const locations = JSON.parse(mapBox.dataset.location);
       displayMap(locations);
@@ -10365,6 +10392,57 @@
     }
     if (logOutBtn) {
       logOutBtn.addEventListener("click", logout);
+    }
+    if (userUpdateForm) {
+      userUpdateForm.addEventListener("submit", (event2) => {
+        event2.preventDefault();
+        const form = new FormData();
+        form.append(
+          "name",
+          document.getElementById("name").value
+        );
+        form.append(
+          "email",
+          document.getElementById("email").value
+        );
+        form.append(
+          "photo",
+          document.getElementById("photo").files[0]
+        );
+        updateSettings(form, "data");
+      });
+    }
+    if (passwordUpdateForm) {
+      passwordUpdateForm.addEventListener(
+        "submit",
+        async (event2) => {
+          event2.preventDefault();
+          document.querySelector(
+            ".btn--save-password"
+          ).textContent = "Updating...";
+          const passwordCurrent = document.getElementById(
+            "password-current"
+          ).value;
+          const newPassword = document.getElementById("password").value;
+          const newPasswordConfirm = document.getElementById(
+            "password-confirm"
+          ).value;
+          await updateSettings(
+            {
+              passwordCurrent,
+              newPassword,
+              newPasswordConfirm
+            },
+            "password"
+          );
+          document.querySelector(
+            ".btn--save-password"
+          ).textContent = "Update password";
+          document.getElementById("password-current").value = "";
+          document.getElementById("password").value = "";
+          document.getElementById("password-confirm").value = "";
+        }
+      );
     }
   });
 })();

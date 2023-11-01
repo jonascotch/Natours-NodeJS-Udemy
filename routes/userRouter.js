@@ -7,8 +7,10 @@ const userController = require('../controllers/userController');
 const authController = require('../controllers/authController');
 
 router.post('/signup', authController.signup);
-router.post('/login', authController.login)
-router.get('/login', authController.logout);
+router
+  .route('/login')
+  .post(authController.login)
+  .get(authController.logout);
 
 router.post(
   '/forgotPassword',
@@ -27,7 +29,12 @@ router.patch(
   authController.updatePassword,
 );
 
-router.patch('/updateMe', userController.updateMe);
+router.patch(
+  '/updateMe',
+  userController.uploadUserPhoto,
+  userController.resizeUserPhoto,
+  userController.updateMe,
+);
 
 router.delete('/deleteMe', userController.deleteUser);
 

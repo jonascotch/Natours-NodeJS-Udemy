@@ -28,30 +28,55 @@ const handleJWTError = () =>
 const handleTokenExpiredError = () =>
   new AppError('Expired token. Please login again', 401);
 
-const sendErrorDev = (err, res) => {
-  res.status(err.statusCode).json({
-    status: err.status,
-    error: err,
-    message: err.message,
-    stack: err.stack,
+const sendErrorDev = (err, req, res) => {
+  // API ERRORS
+  if (req.originalUrl.startsWith('/api')) {
+    return res.status(err.statusCode).json({
+      status: err.status,
+      error: err,
+      message: err.message,
+      stack: err.stack,
+    });
+  }
+  // RENDERED WEBSITE ERRORS
+  return res.status(err.statusCode).render('error', {
+    title: 'Something went wrong',
+    msg: err.message,
   });
 };
 
-const sendErrorProd = (err, res) => {
+const sendErrorProd = (err, req, res) => {
+  // 1) API
   // Operational, trusted error: send message to client
-  if (err.isOperational) {
-    res.status(err.statusCode).json({
-      status: err.status,
-      message: err.message,
-    });
+  if (req.originalUrl.startsWith('/api')) {
+    if (err.isOperational) {
+      return res.status(err.statusCode).json({
+        status: err.status,
+        message: err.message,
+      });
+    }
     // Programming or other unknown error: don't leak error details
-  } else {
     console.error('Error 💥', err);
-    res.status(500).json({
+    return res.status(500).json({
       status: 'error',
       message: 'Something went very wrong',
     });
   }
+  // 2) RENDERED WEBSITE
+  // Operational, trusted error: send message to client
+  if (err.isOperational) {
+    return res.status(err.statusCode).render('error', {
+      title: 'Something went wrong',
+      msg: err.message,
+    });
+  }
+
+  // Programming or other unknown error: don't leak error details
+  console.error('Error 💥', err); // console.log error for developer to see
+  return res.status(err.statusCode).render('error', {
+    title: 'Something went wrong',
+    msg: 'Please try again later', // generic message does not send error message to front end
+  });
 };
 
 module.exports = (err, req, res, next) => {
@@ -59,7 +84,7 @@ module.exports = (err, req, res, next) => {
   err.status = err.status || 'error';
 
   if (process.env.NODE_ENV === 'development') {
-    sendErrorDev(err, res);
+    sendErrorDev(err, req, res);
   }
 
   if (process.env.NODE_ENV === 'production') {
@@ -77,7 +102,7 @@ module.exports = (err, req, res, next) => {
     if (error.name === 'TokenExpiredError')
       error = handleTokenExpiredError();
 
-    sendErrorProd(error, res);
+    sendErrorProd(error, req, res);
   }
 
   next();

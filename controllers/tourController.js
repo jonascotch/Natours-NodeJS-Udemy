@@ -1,9 +1,81 @@
 // const fs = require('fs');
+const multer = require('multer');
+const sharp = require('sharp');
 const Tour = require('../models/tourModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
 //const APIFeatures = require('../utils/apiFeatures');
+
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(
+      new AppError(
+        'File is not an image. Please upload an image',
+        400,
+      ),
+      false,
+    );
+  }
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+
+// we want to upload several files from multiple fields
+exports.uploadTourImages = upload.fields([
+  { name: 'imageCover', maxCount: 1 },
+  { name: 'images', maxCount: 3 },
+]);
+
+exports.resizeTourImages = catchAsync(
+  async (req, res, next) => {
+    if (!req.files.imageCover || !req.files.images)
+      return next();
+
+    // 1 Resize cover image
+    req.body.imageCover = `tour-${
+      req.params.id
+    }-${Date.now()}-cover.jpeg`;
+    await sharp(req.files.imageCover[0].buffer)
+      .resize(2000, 1333)
+      .toFormat('jpeg')
+      .jpeg({ quality: 90 })
+      .toFile(`public/img/tours/${req.body.imageCover}`);
+
+    req.body.images = [];
+
+    // 2 Other images
+    await Promise.all(
+      req.files.images.map(async (file, i) => {
+        const filename = `tour-${
+          req.params.id
+        }-${Date.now()}-${i + 1}.jpeg`;
+        await sharp(file.buffer)
+          .resize(2000, 1333)
+          .toFormat('jpeg')
+          .jpeg({ quality: 90 })
+          .toFile(`public/img/tours/${filename}`);
+
+        req.body.images.push(filename);
+      }),
+    );
+    console.log(req.body);
+    next();
+  },
+);
+
+// if just upload 1 file
+// upload.simgle('photo)
+
+// if upload multiple images from same field
+// upload.array('images', 5) name of array and maxCount
 
 // const tours = JSON.parse(
 //   fs.readFileSync(
