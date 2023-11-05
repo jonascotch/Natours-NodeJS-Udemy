@@ -10365,6 +10365,25 @@
     }
   };
 
+  // public/js/stripe.js
+  var bookTour = async (tourId) => {
+    try {
+      const stripe = Stripe(
+        "pk_test_51O86DUA7esnGDWJwm2X08kLzjogki0Vi3t6LebRaERqNsBt2aLZUZOnodkQZImedagrzYgUycvsXKD3cOFDNaEgM00Gy2D2f3f"
+      );
+      const session = await axios_default(
+        `http://127.0.0.1:8000/api/v1/booking/checkout-session/${tourId}`
+      );
+      console.log(session);
+      await stripe.redirectToCheckout({
+        sessionId: session.data.session.id
+      });
+    } catch (err) {
+      console.log(err);
+      showAlert("error", err);
+    }
+  };
+
   // public/js/index.js
   document.addEventListener("DOMContentLoaded", (event) => {
     const mapBox = document.getElementById("map");
@@ -10378,6 +10397,7 @@
     const passwordUpdateForm = document.querySelector(
       ".form-user-settings"
     );
+    const bookTourBtn = document.getElementById("book-tour-btn");
     if (mapBox) {
       const locations = JSON.parse(mapBox.dataset.location);
       displayMap(locations);
@@ -10444,5 +10464,11 @@
         }
       );
     }
+    if (bookTourBtn)
+      bookTourBtn.addEventListener("click", (e) => {
+        e.target.textContent = "Processing...";
+        const { tourId } = e.target.dataset;
+        bookTour(tourId);
+      });
   });
 })();

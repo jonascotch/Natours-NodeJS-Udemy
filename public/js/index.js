@@ -3,6 +3,7 @@ import '@babel/polyfill';
 import { displayMap } from './mapbox';
 import { login, logout } from './login';
 import { updateSettings } from './updateSettings';
+import { bookTour } from './stripe';
 
 document.addEventListener('DOMContentLoaded', (event) => {
   // Create DOM elements
@@ -17,6 +18,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
   const passwordUpdateForm = document.querySelector(
     '.form-user-settings',
   );
+  const bookTourBtn = document.getElementById('book-tour-btn');
 
   // VALUES
 
@@ -96,4 +98,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
       },
     );
   }
+
+  if (bookTourBtn)
+    bookTourBtn.addEventListener('click', e => {
+        e.target.textContent = 'Processing...';
+        const { tourId } = e.target.dataset
+        bookTour(tourId);
+    })
 });
