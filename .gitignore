@@ -1,5 +1,5 @@
 dev-data/
 node_modules/
-*.env
+config.env
 
 

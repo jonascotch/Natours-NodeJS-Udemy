@@ -66,7 +66,7 @@ exports.resizeTourImages = catchAsync(
         req.body.images.push(filename);
       }),
     );
-    console.log(req.body);
+    // console.log(req.body);
     next();
   },
 );
