@@ -27,7 +27,6 @@ app.set('views', path.join(__dirname, 'views'));
 // 1) GLOBAL MIDDLEWARES
 // Setup CORS
 app.use(cors());
-app.options('*', cors());
 
 // Serving static files
 app.use(express.static(path.join(__dirname, 'public')));
@@ -150,7 +149,7 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
 app.use('/api/v1/booking', bookingRouter);
 
-app.all('*', (req, res, next) => {
+app.use('*', (req, res, next) => {
   next(
     new AppError(
       `Can't find ${req.originalUrl} on this server!`,

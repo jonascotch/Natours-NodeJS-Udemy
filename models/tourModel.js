@@ -146,9 +146,8 @@ tourSchema.virtual('reviews', {
 });
 
 // Document middleware, will run before .save() and .create()
-tourSchema.pre('save', function (next) {
+tourSchema.pre('save', function () {
   this.slug = slugify(this.name, { lower: true });
-  next();
 });
 
 // To embbed Users objects into tour objects; create a new tour and this.guides = [ Users id's ]
@@ -175,19 +174,17 @@ tourSchema.pre('save', function (next) {
 // QUERY MIDDLEWARE
 
 // middleware to exclude secret tours from queries and add a start time to the query (this.start)
-tourSchema.pre(/^find/, function (next) {
+tourSchema.pre(/^find/, function () {
   this.find({ secretTour: { $ne: true } });
   this.start = Date.now();
-  next();
 });
 
 // middleware to populate the guide reference field in all find queries
-tourSchema.pre(/^find/, function (next) {
+tourSchema.pre(/^find/, function () {
   this.populate({
     path: 'guides',
     select: '-__v -passwordChangedAt',
   });
-  next();
 });
 
 // middleware to log the time each find query takes from this.start until now()
