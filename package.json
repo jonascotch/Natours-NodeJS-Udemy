@@ -44,8 +44,8 @@
     "xss-clean": "^0.1.4"
   },
   "devDependencies": {
-    "eslint": "^10.0.3",
-    "eslint-config-airbnb": "^19.0.4",
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
@@ -55,6 +55,6 @@
     "prettier": "^3.8.1"
   },
   "engines": {
-    "node": "^18"
+    "node": "^24.14.0"
   }
 }
